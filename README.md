@@ -140,6 +140,7 @@ MIT License
 
 ## 联系方式
 
-- 项目主页：[GitHub](https://github.com/yourusername/ad-blocker)
-- 问题反馈：[Issues](https://github.com/yourusername/ad-blocker/issues)
-- 邮件联系：your.email@example.com 
+- 项目主页：[GitHub](https://github.com/yangweishuo/ad-blocker)
+- 问题反馈：[Issues](https://github.com/yangweishuo/ad-blocker/issues)
+- 邮件联系：yangweishuo297@gmail.com
+- 微信公众号：前端大白话
