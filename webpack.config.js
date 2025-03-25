@@ -27,7 +27,23 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              importLoaders: 1
+            }
+          },
+          'postcss-loader'
+        ]
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'images/[name][ext]'
+        }
       }
     ]
   },
@@ -38,17 +54,13 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'manifest.json', to: 'manifest.json' }
+        { from: 'manifest.json', to: 'manifest.json' },
+        { from: 'src/images', to: 'images' }
       ]
     })
   ],
   resolve: {
-    extensions: ['.js']
+    extensions: ['.js', '.css']
   },
-  devtool: 'source-map',
-  optimization: {
-    splitChunks: {
-      chunks: 'all'
-    }
-  }
+  devtool: 'source-map'
 }; 

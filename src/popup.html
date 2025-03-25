@@ -3,37 +3,282 @@
 <head>
   <meta charset="UTF-8">
   <title>Ad Blocker Pro</title>
-  <link rel="stylesheet" href="css/popup.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <div class="container">
-    <h1>Ad Blocker Pro</h1>
-    
-    <div class="status">
-      <button id="enableButton" class="btn btn-primary">启用广告拦截</button>
-      <button id="disableButton" class="btn btn-danger">禁用广告拦截</button>
-    </div>
+    <!-- 头部 -->
+    <header class="header">
+      <h1>Ad Blocker Pro</h1>
+      <div class="header-actions">
+        <div class="status-badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>保护已启用</span>
+        </div>
+        <label class="blocker-toggle">
+          <input type="checkbox" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </header>
 
-    <div id="statsContainer" class="stats">
-      <h2>统计信息</h2>
-      <div class="stat-item">
-        <span>已拦截广告：</span>
-        <span id="blockedCount">0</span>
-      </div>
-      <div class="stat-item">
-        <span>已节省流量：</span>
-        <span id="savedBandwidth">0 MB</span>
-      </div>
-    </div>
+    <!-- 导航栏 -->
+    <nav class="nav-tabs">
+      <a href="#stats" class="nav-tab active">
+        <i class="fas fa-chart-line"></i>
+        <span>统计</span>
+      </a>
+      <a href="#performance" class="nav-tab">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>性能</span>
+      </a>
+      <a href="#rules" class="nav-tab">
+        <i class="fas fa-list"></i>
+        <span>规则</span>
+      </a>
+      <a href="#whitelist" class="nav-tab">
+        <i class="fas fa-check-circle"></i>
+        <span>白名单</span>
+      </a>
+      <a href="#settings" class="nav-tab">
+        <i class="fas fa-cog"></i>
+        <span>设置</span>
+      </a>
+    </nav>
 
-    <div id="rulesContainer" class="rules">
-      <h2>规则管理</h2>
-      <div class="rule-list">
-        <!-- 规则列表将通过 JavaScript 动态添加 -->
+    <!-- 主内容区域 -->
+    <main class="main-content">
+      <!-- 统计卡片 -->
+      <div id="stats" class="content-card active">
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-value">1,234</div>
+            <div class="stat-label">已拦截广告</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">2.5MB</div>
+            <div class="stat-label">节省流量</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">5min</div>
+            <div class="stat-label">节省时间</div>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-secondary">添加规则</button>
-    </div>
+
+      <!-- 性能监控 -->
+      <div id="performance" class="content-card">
+        <div class="performance">
+          <div class="performance-header">
+            <div class="performance-title">
+              <h2>性能监控</h2>
+              <span class="last-update">最后更新: <time>刚刚</time></span>
+            </div>
+            <div class="performance-actions">
+              <button class="btn btn-refresh">
+                <i class="fas fa-sync"></i>
+                刷新
+              </button>
+              <button class="btn btn-export">
+                <i class="fas fa-download"></i>
+                导出报告
+              </button>
+            </div>
+          </div>
+          <div class="performance-grid">
+            <div class="performance-card">
+              <div class="performance-icon">
+                <i class="fas fa-microchip"></i>
+              </div>
+              <div class="performance-content">
+                <div class="performance-value">2.5%</div>
+                <div class="performance-label">CPU 使用率</div>
+                <div class="performance-chart">
+                  <div class="chart-bar" style="width: 25%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-icon">
+                <i class="fas fa-memory"></i>
+              </div>
+              <div class="performance-content">
+                <div class="performance-value">156MB</div>
+                <div class="performance-label">内存使用</div>
+                <div class="performance-chart">
+                  <div class="chart-bar" style="width: 45%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-icon">
+                <i class="fas fa-network-wired"></i>
+              </div>
+              <div class="performance-content">
+                <div class="performance-value">1.2MB/s</div>
+                <div class="performance-label">网络流量</div>
+                <div class="performance-chart">
+                  <div class="chart-bar" style="width: 60%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="performance-card">
+              <div class="performance-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="performance-content">
+                <div class="performance-value">45ms</div>
+                <div class="performance-label">平均响应时间</div>
+                <div class="performance-chart">
+                  <div class="chart-bar" style="width: 15%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="performance-details">
+            <div class="details-header">
+              <h3>详细统计</h3>
+              <div class="details-actions">
+                <button class="btn btn-sm">
+                  <i class="fas fa-chart-line"></i>
+                  趋势图
+                </button>
+                <button class="btn btn-sm">
+                  <i class="fas fa-filter"></i>
+                  筛选
+                </button>
+              </div>
+            </div>
+            <div class="performance-table">
+              <div class="table-header">
+                <span>指标</span>
+                <span>当前值</span>
+                <span>峰值</span>
+                <span>趋势</span>
+              </div>
+              <div class="table-row">
+                <span>CPU 使用率</span>
+                <span>2.5%</span>
+                <span>5.8%</span>
+                <span class="trend positive">
+                  <i class="fas fa-arrow-up"></i>
+                  0.3%
+                </span>
+              </div>
+              <div class="table-row">
+                <span>内存使用</span>
+                <span>156MB</span>
+                <span>180MB</span>
+                <span class="trend negative">
+                  <i class="fas fa-arrow-down"></i>
+                  0.5%
+                </span>
+              </div>
+              <div class="table-row">
+                <span>网络流量</span>
+                <span>1.2MB/s</span>
+                <span>2.5MB/s</span>
+                <span class="trend neutral">
+                  <i class="fas fa-minus"></i>
+                  0%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 规则列表 -->
+      <div id="rules" class="content-card">
+        <div class="rules">
+          <div class="rules-header">
+            <h2>拦截规则</h2>
+            <div class="rules-actions">
+              <button class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                添加规则
+              </button>
+              <button class="btn">
+                <i class="fas fa-sync"></i>
+                恢复默认
+              </button>
+            </div>
+          </div>
+          <div class="rule-list">
+            <div class="rule-item">
+              <div class="rule-content">
+                <span class="rule-pattern">*://*.doubleclick.net/*</span>
+                <span class="rule-category">广告</span>
+              </div>
+              <button class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+            <div class="rule-item">
+              <div class="rule-content">
+                <span class="rule-pattern">*://*.google-analytics.com/*</span>
+                <span class="rule-category">分析</span>
+              </div>
+              <button class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 白名单 -->
+      <div id="whitelist" class="content-card">
+        <div class="whitelist">
+          <h2>白名单</h2>
+          <div class="whitelist-form">
+            <input type="text" placeholder="输入域名 (例如: example.com)">
+            <button class="btn btn-primary">
+              <i class="fas fa-plus"></i>
+              添加
+            </button>
+          </div>
+          <div class="whitelist-list">
+            <div class="whitelist-item">
+              <span>example.com</span>
+              <button class="btn btn-danger">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置 -->
+      <div id="settings" class="content-card">
+        <div class="settings">
+          <h2>设置</h2>
+          <div class="settings-list">
+            <div class="setting-item">
+              <div class="setting-content">
+                <span class="setting-label">启用广告拦截</span>
+                <span class="setting-description">开启后将自动拦截广告内容</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <div class="setting-content">
+                <span class="setting-label">显示通知</span>
+                <span class="setting-description">拦截广告时显示通知</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
-  <script src="js/popup.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html> 
