@@ -4,13 +4,13 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
-    background: './src/js/background.js',
     popup: './src/js/popup.js',
+    background: './src/js/background.js',
     content: './src/js/content.js'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/[name].js',
+    filename: '[name].js',
     clean: true
   },
   module: {
@@ -28,29 +28,22 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
-      },
-      {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource'
       }
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/popup.html',
-      filename: 'popup.html',
-      chunks: ['popup']
+      filename: 'popup.html'
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'manifest.json', to: 'manifest.json' },
-        { from: 'src/images', to: 'images' },
-        { from: 'src/css', to: 'css' }
+        { from: 'manifest.json', to: 'manifest.json' }
       ]
     })
   ],
   resolve: {
-    extensions: ['.js', '.json']
+    extensions: ['.js']
   },
   devtool: 'source-map',
   optimization: {

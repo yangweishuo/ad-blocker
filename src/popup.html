@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Blocker Pro</title>
+  <link rel="stylesheet" href="css/popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Ad Blocker Pro</h1>
+    
+    <div class="status">
+      <button id="enableButton" class="btn btn-primary">启用广告拦截</button>
+      <button id="disableButton" class="btn btn-danger">禁用广告拦截</button>
+    </div>
+
+    <div id="statsContainer" class="stats">
+      <h2>统计信息</h2>
+      <div class="stat-item">
+        <span>已拦截广告：</span>
+        <span id="blockedCount">0</span>
+      </div>
+      <div class="stat-item">
+        <span>已节省流量：</span>
+        <span id="savedBandwidth">0 MB</span>
+      </div>
+    </div>
+
+    <div id="rulesContainer" class="rules">
+      <h2>规则管理</h2>
+      <div class="rule-list">
+        <!-- 规则列表将通过 JavaScript 动态添加 -->
+      </div>
+      <button class="btn btn-secondary">添加规则</button>
+    </div>
+  </div>
+  <script src="js/popup.js"></script>
+</body>
+</html> 
