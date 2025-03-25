@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --primary-hover: #388E3C;
+      --danger-color: #f44336;
+      --danger-hover: #d32f2f;
+      --success-color: #4CAF50;
+      --success-hover: #388E3C;
+      --warning-color: #FFC107;
+      --warning-hover: #FFA000;
+      --background-color: #f5f5f5;
+      --text-color: #333333;
+      --border-color: #e0e0e0;
+      --card-background: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .header h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header h2::before {
+      content: "🛡️";
+      font-size: 28px;
+    }
+
+    .stats-card {
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px var(--shadow-color);
+    }
+
+    .stats-card h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-card h3::before {
+      content: "📊";
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .stat-item {
+      background: var(--background-color);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .rule-form {
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      margin-bottom: 20px;
+    }
+
+    .rule-form h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rule-form h3::before {
+      content: "⚙️";
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    select, input {
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: var(--background-color);
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--warning-color);
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--warning-hover);
+      transform: translateY(-1px);
+    }
+
+    .rule-list {
+      background: var(--card-background);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      margin-bottom: 20px;
+    }
+
+    .rule-list h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rule-list h3::before {
+      content: "📋";
+    }
+
+    .rules-container {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .rules-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .rules-container::-webkit-scrollbar-track {
+      background: var(--background-color);
+      border-radius: 3px;
+    }
+
+    .rules-container::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 3px;
+    }
+
+    .rule-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--background-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+
+    .rule-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .rule-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .rule-type {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .rule-pattern {
+      font-size: 14px;
+      color: var(--text-color);
+      word-break: break-all;
+      font-family: monospace;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #666;
+      background: var(--background-color);
+      border-radius: 8px;
+    }
+
+    .empty-state p {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .tab:hover:not(.active) {
+      background: var(--background-color);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .source-item {
+      background: var(--card-background);
+      padding: 16px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      transition: all 0.2s;
+    }
+
+    .source-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
+    }
+
+    .source-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .source-name {
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .source-url {
+      font-size: 12px;
+      color: #666;
+      font-family: monospace;
+    }
+
+    .source-status {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .source-status.active {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .source-status.inactive {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .whitelist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--background-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+
+    .whitelist-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .whitelist-domain {
+      font-family: monospace;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+
+    .advanced-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .advanced-stat-item {
+      background: var(--background-color);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .advanced-stat-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .advanced-stat-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .advanced-stat-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .import-export {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .performance-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .metric-item {
+      background: var(--card-background);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow-color);
+      transition: all 0.2s;
+    }
+
+    .metric-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
+    }
+
+    .metric-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 8px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .default-rules-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: var(--background-color);
+      border-radius: 8px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary-color);
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    .label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .description {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease-out;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Ad Blocker Pro</h2>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="overview">概览</div>
+      <div class="tab" data-tab="rules">规则管理</div>
+      <div class="tab" data-tab="whitelist">白名单</div>
+      <div class="tab" data-tab="performance">性能</div>
+    </div>
+
+    <!-- 概览标签页 -->
+    <div class="tab-content active" id="overview">
+      <div class="stats-card">
+        <h3>统计信息</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="blockedRequests">0</div>
+            <div class="stat-label">已拦截请求</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="savedBandwidth">0 MB</div>
+            <div class="stat-label">节省流量</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="lastUpdate">-</div>
+            <div class="stat-label">最后更新</div>
+          </div>
+        </div>
+        <div class="advanced-stats">
+          <div class="advanced-stat-item">
+            <div class="advanced-stat-value" id="activeRules">0</div>
+            <div class="advanced-stat-label">活跃规则数</div>
+          </div>
+          <div class="advanced-stat-item">
+            <div class="advanced-stat-value" id="whitelistDomains">0</div>
+            <div class="advanced-stat-label">白名单域名</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 规则管理标签页 -->
+    <div class="tab-content" id="rules">
+      <div class="rule-form">
+        <h3>添加自定义规则</h3>
+        <div class="form-group">
+          <label for="ruleType">规则类型</label>
+          <select id="ruleType">
+            <option value="regex">正则表达式</option>
+            <option value="css">CSS 选择器</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="rulePattern">规则模式</label>
+          <input type="text" id="rulePattern" placeholder="输入规则模式">
+        </div>
+        <div class="button-group">
+          <button class="btn-primary" id="addRule">
+            <span>添加规则</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="rule-list">
+        <h3>自定义规则列表</h3>
+        <div class="rules-container" id="rulesList">
+          <div class="empty-state">
+            <p>暂无自定义规则</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-sources">
+        <h3>规则源</h3>
+        <div class="source-list">
+          <!-- 规则源列表将通过 JavaScript 动态生成 -->
+        </div>
+        <div class="default-rules-option">
+          <label class="switch">
+            <input type="checkbox" id="defaultRulesToggle" checked>
+            <span class="slider round"></span>
+            <span class="label">启用默认拦截规则</span>
+          </label>
+          <p class="description">启用后将使用内置的默认规则，包括广告、跟踪器、钓鱼网站等拦截规则</p>
+        </div>
+        <button id="updateAllSources" class="btn btn-primary">
+          <span>更新所有规则</span>
+        </button>
+      </div>
+
+      <div class="import-export">
+        <button class="btn-secondary" id="exportRules">导出规则</button>
+        <button class="btn-secondary" id="importRules">导入规则</button>
+      </div>
+    </div>
+
+    <!-- 白名单标签页 -->
+    <div class="tab-content" id="whitelist">
+      <div class="whitelist-form">
+        <h3>添加白名单域名</h3>
+        <div class="form-group">
+          <label for="whitelistDomain">域名</label>
+          <input type="text" id="whitelistDomain" placeholder="例如: example.com">
+        </div>
+        <div class="button-group">
+          <button class="btn-primary" id="addWhitelist">添加到白名单</button>
+        </div>
+      </div>
+
+      <div class="whitelist-list">
+        <h3>白名单域名列表</h3>
+        <div id="whitelistList">
+          <!-- 白名单列表将通过 JavaScript 动态添加 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 性能标签页 -->
+    <div class="tab-content" id="performance">
+      <div class="performance-metrics">
+        <div class="metric-item">
+          <div class="metric-value" id="avgBlockTime">0ms</div>
+          <div class="metric-label">平均拦截时间</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="memoryUsage">0MB</div>
+          <div class="metric-label">内存使用</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="cpuUsage">0%</div>
+          <div class="metric-label">CPU 使用率</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="ruleCacheSize">0KB</div>
+          <div class="metric-label">规则缓存大小</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 

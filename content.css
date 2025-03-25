@@ -1,0 +1,29 @@
+/* 隐藏常见的广告容器 */
+[class*="ad-"],
+[class*="ads-"],
+[class*="advertisement"],
+[id*="ad-"],
+[id*="ads-"],
+[id*="advertisement"],
+[class*="banner"],
+[id*="banner"],
+[class*="sponsor"],
+[id*="sponsor"] {
+  display: none !important;
+}
+
+/* 隐藏 iframe 广告 */
+iframe[src*="ad"],
+iframe[src*="ads"],
+iframe[src*="banner"],
+iframe[src*="sponsor"] {
+  display: none !important;
+}
+
+/* 隐藏广告链接 */
+a[href*="ad"],
+a[href*="ads"],
+a[href*="banner"],
+a[href*="sponsor"] {
+  display: none !important;
+} 
