@@ -1,0 +1,79 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# JavaScript files
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+
+# CSS files
+*.css text
+*.scss text
+*.sass text
+
+# HTML files
+*.html text
+*.htm text
+
+# JSON files
+*.json text
+
+# Markdown files
+*.md text diff=markdown
+*.markdown text diff=markdown
+
+# Documentation
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# Scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Config files
+*.yml text
+*.yaml text
+*.xml text
+*.ini text
+*.conf text
+
+# Lock files
+package-lock.json text
+yarn.lock text
+
+# Build files
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+
+# IDE files
+.idea/* text
+.vscode/* text
+*.sublime-project text
+*.sublime-workspace text
+
+# OS files
+.DS_Store binary
+Thumbs.db binary 
