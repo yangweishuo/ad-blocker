@@ -24,18 +24,33 @@ iconFiles.forEach(file => {
 
 // 检查其他必要文件
 const requiredFiles = [
-    'dist/popup.html',
-    'dist/css/popup.css',
-    'dist/js/popup.js',
-    'dist/background.js',
-    'dist/content.js',
-    'dist/manifest.json'
+    'manifest.json',
+    'popup.html',
+    'background.js',
+    'content.js',
+    'rules.json',
+    'css/popup.css',
+    'css/hot-search.css',
+    'js/popup.js',
+    'js/hot-search.js',
+    'images/icon16.png',
+    'images/icon48.png',
+    'images/icon128.png'
 ];
 
-requiredFiles.forEach(file => {
-    if (!fs.existsSync(file)) {
-        console.error(`Missing required file: ${file}`);
-    } else {
-        console.log(`Found required file: ${file}`);
-    }
-}); 
+const distDir = path.join(__dirname, 'dist');
+
+function checkFiles() {
+    console.log('Checking required files...\n');
+    
+    requiredFiles.forEach(file => {
+        const filePath = path.join(distDir, file);
+        if (fs.existsSync(filePath)) {
+            console.log(`✓ Found: ${file}`);
+        } else {
+            console.log(`✗ Missing: ${file}`);
+        }
+    });
+}
+
+checkFiles(); 

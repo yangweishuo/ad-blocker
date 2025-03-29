@@ -10,7 +10,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/[name].js',
+    filename: '[name].js',
     clean: true
   },
   module: {
@@ -46,7 +46,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'manifest.json', to: 'manifest.json' },
+        { from: 'src/manifest.json', to: 'manifest.json' },
         { from: 'src/rules', to: 'rules' },
         { from: 'src/images', to: 'images' },
         { from: 'src/css', to: 'css' }

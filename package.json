@@ -5,11 +5,10 @@
   "main": "dist/background.js",
   "scripts": {
     "start": "webpack --mode development --watch",
-    "build": "npm run generate-icons && webpack --mode production",
+    "build": "webpack --mode production",
     "test": "jest",
     "lint": "eslint src/**/*.js",
     "format": "prettier --write \"src/**/*.{js,css,html}\"",
-    "generate-icons": "node scripts/generate-icons.js",
     "dev": "webpack --mode development --watch"
   },
   "keywords": [

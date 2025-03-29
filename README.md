@@ -178,13 +178,6 @@ npm run package:min
    - 优化资源
    - 生成生产版本
 
-3. 打包发布
-   ```bash
-   npm run package
-   ```
-   - 生成发布包
-   - 包含所有必要文件
-   - 准备发布
 
 ## 注意事项
 

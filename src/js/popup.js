@@ -219,7 +219,8 @@ const defaultWhitelist = [
     'chatbot.baidu.com',
     'tongyi.aliyun.com',
     'tongyi.cn',
-    'tongyi.com'
+    'tongyi.com',
+    'xiaohongshu.com',
 ];
 
 // 获取类别标签

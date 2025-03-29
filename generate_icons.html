@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Icons</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        canvas {
+            margin: 10px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Icon Generator</h1>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+    <button onclick="downloadIcons()">Download Icons</button>
+
+    <script>
+        function drawIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            
+            // 背景
+            ctx.fillStyle = '#1890ff';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 盾牌形状
+            ctx.beginPath();
+            ctx.moveTo(size * 0.2, size * 0.3);
+            ctx.lineTo(size * 0.5, size * 0.1);
+            ctx.lineTo(size * 0.8, size * 0.3);
+            ctx.lineTo(size * 0.8, size * 0.7);
+            ctx.lineTo(size * 0.5, size * 0.9);
+            ctx.lineTo(size * 0.2, size * 0.7);
+            ctx.closePath();
+            
+            // 渐变填充
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#40a9ff');
+            gradient.addColorStop(1, '#096dd9');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // 边框
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = size * 0.06;
+            ctx.stroke();
+            
+            // 中间的"AD"文字
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${size * 0.3}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('AD', size * 0.5, size * 0.5);
+            
+            // 斜线
+            ctx.beginPath();
+            ctx.moveTo(size * 0.2, size * 0.2);
+            ctx.lineTo(size * 0.8, size * 0.8);
+            ctx.strokeStyle = '#ff4d4f';
+            ctx.lineWidth = size * 0.08;
+            ctx.stroke();
+        }
+
+        function downloadIcons() {
+            const sizes = [16, 48, 128];
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`canvas${size}`);
+                drawIcon(canvas);
+                
+                const link = document.createElement('a');
+                link.download = `icon${size}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // 初始预览
+        drawIcon(document.getElementById('canvas16'));
+        drawIcon(document.getElementById('canvas48'));
+        drawIcon(document.getElementById('canvas128'));
+    </script>
+</body>
+</html> 
