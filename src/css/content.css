@@ -1,0 +1,23 @@
+/* Content script styles */
+.ad-blocker-pro-hidden {
+  display: none !important;
+}
+
+.ad-blocker-pro-blocked {
+  position: relative;
+  overflow: hidden;
+}
+
+.ad-blocker-pro-blocked::before {
+  content: "Ad Blocked";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
+} 

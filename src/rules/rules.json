@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "image",
+        "media",
+        "font",
+        "websocket",
+        "xmlhttprequest",
+        "sub_frame",
+        "script",
+        "other"
+      ],
+      "excludedInitiatorDomains": [],
+      "excludedRequestMethods": [],
+      "isUrlFilterCaseSensitive": false
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "image",
+        "media",
+        "font",
+        "websocket",
+        "xmlhttprequest",
+        "sub_frame",
+        "script",
+        "other"
+      ],
+      "excludedInitiatorDomains": [],
+      "excludedRequestMethods": [],
+      "isUrlFilterCaseSensitive": false
+    }
+  }
+] 

@@ -10,7 +10,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
+    filename: 'js/[name].js',
     clean: true
   },
   module: {
@@ -27,16 +27,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1
-            }
-          },
-          'postcss-loader'
-        ]
+        use: ['style-loader', 'css-loader', 'postcss-loader']
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -50,12 +41,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/popup.html',
-      filename: 'popup.html'
+      filename: 'popup.html',
+      chunks: ['popup']
     }),
     new CopyWebpackPlugin({
       patterns: [
         { from: 'manifest.json', to: 'manifest.json' },
-        { from: 'src/images', to: 'images' }
+        { from: 'src/rules', to: 'rules' },
+        { from: 'src/images', to: 'images' },
+        { from: 'src/css', to: 'css' }
       ]
     })
   ],

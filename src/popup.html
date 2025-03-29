@@ -1,284 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>Ad Blocker Pro</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Blocker Pro</title>
+    <link rel="stylesheet" href="css/popup.css">
 </head>
 <body>
-  <div class="container">
-    <!-- 头部 -->
-    <header class="header">
-      <h1>Ad Blocker Pro</h1>
-      <div class="header-actions">
-        <div class="status-badge">
-          <i class="fas fa-shield-alt"></i>
-          <span>保护已启用</span>
-        </div>
-        <label class="blocker-toggle">
-          <input type="checkbox" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-    </header>
-
-    <!-- 导航栏 -->
-    <nav class="nav-tabs">
-      <a href="#stats" class="nav-tab active">
-        <i class="fas fa-chart-line"></i>
-        <span>统计</span>
-      </a>
-      <a href="#performance" class="nav-tab">
-        <i class="fas fa-tachometer-alt"></i>
-        <span>性能</span>
-      </a>
-      <a href="#rules" class="nav-tab">
-        <i class="fas fa-list"></i>
-        <span>规则</span>
-      </a>
-      <a href="#whitelist" class="nav-tab">
-        <i class="fas fa-check-circle"></i>
-        <span>白名单</span>
-      </a>
-      <a href="#settings" class="nav-tab">
-        <i class="fas fa-cog"></i>
-        <span>设置</span>
-      </a>
-    </nav>
-
-    <!-- 主内容区域 -->
-    <main class="main-content">
-      <!-- 统计卡片 -->
-      <div id="stats" class="content-card active">
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-value">1,234</div>
-            <div class="stat-label">已拦截广告</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">2.5MB</div>
-            <div class="stat-label">节省流量</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">5min</div>
-            <div class="stat-label">节省时间</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 性能监控 -->
-      <div id="performance" class="content-card">
-        <div class="performance">
-          <div class="performance-header">
-            <div class="performance-title">
-              <h2>性能监控</h2>
-              <span class="last-update">最后更新: <time>刚刚</time></span>
+    <div class="container">
+        <div class="header">
+            <h1>Ad Blocker Pro</h1>
+            <div class="toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="adBlockerToggle">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <div class="performance-actions">
-              <button class="btn btn-refresh">
-                <i class="fas fa-sync"></i>
-                刷新
-              </button>
-              <button class="btn btn-export">
-                <i class="fas fa-download"></i>
-                导出报告
-              </button>
-            </div>
-          </div>
-          <div class="performance-grid">
-            <div class="performance-card">
-              <div class="performance-icon">
-                <i class="fas fa-microchip"></i>
-              </div>
-              <div class="performance-content">
-                <div class="performance-value">2.5%</div>
-                <div class="performance-label">CPU 使用率</div>
-                <div class="performance-chart">
-                  <div class="chart-bar" style="width: 25%"></div>
+        </div>
+
+        <div class="content">
+            <!-- 统计卡片 -->
+            <div class="card stats">
+                <h2>统计信息</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="adsBlocked">0</div>
+                        <div class="stat-label">已拦截广告</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="dataSaved">0 MB</div>
+                        <div class="stat-label">节省流量</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="timeSaved">0 分钟</div>
+                        <div class="stat-label">节省时间</div>
+                    </div>
                 </div>
-              </div>
             </div>
-            <div class="performance-card">
-              <div class="performance-icon">
-                <i class="fas fa-memory"></i>
-              </div>
-              <div class="performance-content">
-                <div class="performance-value">156MB</div>
-                <div class="performance-label">内存使用</div>
-                <div class="performance-chart">
-                  <div class="chart-bar" style="width: 45%"></div>
-                </div>
-              </div>
-            </div>
-            <div class="performance-card">
-              <div class="performance-icon">
-                <i class="fas fa-network-wired"></i>
-              </div>
-              <div class="performance-content">
-                <div class="performance-value">1.2MB/s</div>
-                <div class="performance-label">网络流量</div>
-                <div class="performance-chart">
-                  <div class="chart-bar" style="width: 60%"></div>
-                </div>
-              </div>
-            </div>
-            <div class="performance-card">
-              <div class="performance-icon">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="performance-content">
-                <div class="performance-value">45ms</div>
-                <div class="performance-label">平均响应时间</div>
-                <div class="performance-chart">
-                  <div class="chart-bar" style="width: 15%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="performance-details">
-            <div class="details-header">
-              <h3>详细统计</h3>
-              <div class="details-actions">
-                <button class="btn btn-sm">
-                  <i class="fas fa-chart-line"></i>
-                  趋势图
-                </button>
-                <button class="btn btn-sm">
-                  <i class="fas fa-filter"></i>
-                  筛选
-                </button>
-              </div>
-            </div>
-            <div class="performance-table">
-              <div class="table-header">
-                <span>指标</span>
-                <span>当前值</span>
-                <span>峰值</span>
-                <span>趋势</span>
-              </div>
-              <div class="table-row">
-                <span>CPU 使用率</span>
-                <span>2.5%</span>
-                <span>5.8%</span>
-                <span class="trend positive">
-                  <i class="fas fa-arrow-up"></i>
-                  0.3%
-                </span>
-              </div>
-              <div class="table-row">
-                <span>内存使用</span>
-                <span>156MB</span>
-                <span>180MB</span>
-                <span class="trend negative">
-                  <i class="fas fa-arrow-down"></i>
-                  0.5%
-                </span>
-              </div>
-              <div class="table-row">
-                <span>网络流量</span>
-                <span>1.2MB/s</span>
-                <span>2.5MB/s</span>
-                <span class="trend neutral">
-                  <i class="fas fa-minus"></i>
-                  0%
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- 规则列表 -->
-      <div id="rules" class="content-card">
-        <div class="rules">
-          <div class="rules-header">
-            <h2>拦截规则</h2>
-            <div class="rules-actions">
-              <button class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                添加规则
-              </button>
-              <button class="btn">
-                <i class="fas fa-sync"></i>
-                恢复默认
-              </button>
+            <!-- 规则卡片 -->
+            <div class="card rules">
+                <div class="rules-header">
+                    <h2>广告拦截规则</h2>
+                    <button id="addRuleBtn" class="btn-primary">添加规则</button>
+                </div>
+                <div class="rules-list" id="ruleList">
+                    <!-- 规则列表将通过JavaScript动态生成 -->
+                </div>
             </div>
-          </div>
-          <div class="rule-list">
-            <div class="rule-item">
-              <div class="rule-content">
-                <span class="rule-pattern">*://*.doubleclick.net/*</span>
-                <span class="rule-category">广告</span>
-              </div>
-              <button class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-            <div class="rule-item">
-              <div class="rule-content">
-                <span class="rule-pattern">*://*.google-analytics.com/*</span>
-                <span class="rule-category">分析</span>
-              </div>
-              <button class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- 白名单 -->
-      <div id="whitelist" class="content-card">
-        <div class="whitelist">
-          <h2>白名单</h2>
-          <div class="whitelist-form">
-            <input type="text" placeholder="输入域名 (例如: example.com)">
-            <button class="btn btn-primary">
-              <i class="fas fa-plus"></i>
-              添加
-            </button>
-          </div>
-          <div class="whitelist-list">
-            <div class="whitelist-item">
-              <span>example.com</span>
-              <button class="btn btn-danger">
-                <i class="fas fa-trash"></i>
-              </button>
+            <!-- 白名单卡片 -->
+            <div class="card whitelist">
+                <div class="card-header">
+                    <h2>白名单</h2>
+                    <div class="whitelist-input-container">
+                        <input type="text" id="whitelistInput" placeholder="输入域名">
+                        <button class="btn" id="addWhitelistBtn">添加</button>
+                    </div>
+                </div>
+                <div class="whitelist-list" id="whitelistList">
+                    <!-- 白名单列表将通过 JavaScript 动态生成 -->
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- 设置 -->
-      <div id="settings" class="content-card">
-        <div class="settings">
-          <h2>设置</h2>
-          <div class="settings-list">
-            <div class="setting-item">
-              <div class="setting-content">
-                <span class="setting-label">启用广告拦截</span>
-                <span class="setting-description">开启后将自动拦截广告内容</span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
+            <!-- 设置卡片 -->
+            <div class="card settings">
+                <h2>设置</h2>
+                <div class="settings-list">
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="advancedFiltering">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="setting-label">高级过滤</span>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="showNotifications">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="setting-label">显示通知</span>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="autoUpdateRules">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="setting-label">自动更新规则</span>
+                    </div>
+                </div>
             </div>
-            <div class="setting-item">
-              <div class="setting-content">
-                <span class="setting-label">显示通知</span>
-                <span class="setting-description">拦截广告时显示通知</span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
         </div>
-      </div>
-    </main>
-  </div>
-  <script src="popup.js"></script>
+    </div>
+
+    <!-- 规则对话框 -->
+    <div id="ruleDialog" class="rule-dialog">
+        <div class="dialog-content">
+            <h2>添加规则</h2>
+            <form id="ruleForm">
+                <div class="form-group">
+                    <label for="rulePattern">规则模式</label>
+                    <input type="text" id="rulePattern" name="pattern" required placeholder="例如: *.example.com/*">
+                </div>
+                <div class="form-group">
+                    <label for="ruleCategory">规则类别</label>
+                    <select id="ruleCategory" name="category" required>
+                        <option value="ads">广告</option>
+                        <option value="trackers">跟踪器</option>
+                        <option value="social">社交媒体</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rulePriority">优先级</label>
+                    <select id="rulePriority" name="priority" required>
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="switch">
+                        <input type="checkbox" id="ruleEnabled" name="enabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="setting-label">启用规则</span>
+                </div>
+                <div class="dialog-actions">
+                    <button type="button" id="cancelRuleBtn" class="btn-secondary">取消</button>
+                    <button type="submit" class="btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/popup.js"></script>
 </body>
 </html> 

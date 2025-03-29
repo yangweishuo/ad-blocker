@@ -1,682 +1,572 @@
 import browser from 'webextension-polyfill';
 import '../css/popup.css';
 
-// 初始化状态
-let isEnabled = true;
-let lastUpdateTime = new Date();
-
-// DOM 元素
+// 初始化 DOM 元素
 const elements = {
-  statusText: document.querySelector('.status-badge span'),
-  statusIcon: document.querySelector('.status-badge i'),
-  blockerToggle: document.querySelector('.blocker-toggle input'),
-  lastUpdateTime: document.querySelector('.last-update time'),
-  adsBlocked: document.getElementById('ads-blocked'),
-  dataSaved: document.getElementById('data-saved'),
-  timeSaved: document.getElementById('time-saved'),
-  ruleList: document.getElementById('rule-list'),
-  whitelistInput: document.getElementById('whitelist-input'),
-  whitelistList: document.getElementById('whitelist-list'),
-  addRuleBtn: document.getElementById('add-rule-btn'),
-  defaultRulesBtn: document.getElementById('default-rules-btn'),
-  importRulesBtn: document.getElementById('import-rules-btn'),
-  exportRulesBtn: document.getElementById('export-rules-btn'),
-  addWhitelistBtn: document.getElementById('add-whitelist-btn'),
-  settingsLink: document.getElementById('settings-link'),
-  helpLink: document.getElementById('help-link'),
-  aboutLink: document.getElementById('about-link')
+    adBlockerToggle: document.getElementById('adBlockerToggle'),
+    addRuleBtn: document.getElementById('addRuleBtn'),
+    ruleList: document.getElementById('ruleList'),
+    ruleDialog: document.getElementById('ruleDialog'),
+    ruleForm: document.getElementById('ruleForm'),
+    cancelRuleBtn: document.getElementById('cancelRuleBtn'),
+    whitelistInput: document.getElementById('whitelistInput'),
+    addWhitelistBtn: document.getElementById('addWhitelistBtn'),
+    whitelistList: document.getElementById('whitelistList'),
+    // 统计信息元素
+    adsBlocked: document.getElementById('adsBlocked'),
+    dataSaved: document.getElementById('dataSaved'),
+    timeSaved: document.getElementById('timeSaved'),
+    // 设置元素
+    advancedFiltering: document.getElementById('advancedFiltering'),
+    showNotifications: document.getElementById('showNotifications'),
+    autoUpdateRules: document.getElementById('autoUpdateRules')
 };
 
-// 统计数据
-let stats = {
-  adsBlocked: 0,
-  dataSaved: 0,
-  timeSaved: 0
-};
+// 状态变量
+let rules = [];
+let whitelist = [];
 
-// 性能监控数据
-let performanceData = {
-  cpu: {
-    current: 0,
-    peak: 0,
-    trend: 0
-  },
-  memory: {
-    current: 0,
-    peak: 0,
-    trend: 0
-  },
-  network: {
-    current: 0,
-    peak: 0,
-    trend: 0
-  },
-  responseTime: {
-    current: 0,
-    peak: 0,
-    trend: 0
-  }
-};
-
-// 默认规则列表
+// 默认拦截规则
 const defaultRules = [
-  // 广告网络
-  { id: 1, pattern: '*.doubleclick.net/*', enabled: true, category: 'ads' },
-  { id: 2, pattern: '*.google-analytics.com/*', enabled: true, category: 'tracking' },
-  { id: 3, pattern: '*.facebook.com/*', enabled: true, category: 'social' },
-  { id: 4, pattern: '*.adnxs.com/*', enabled: true, category: 'ads' },
-  { id: 5, pattern: '*.advertising.com/*', enabled: true, category: 'ads' },
-  { id: 6, pattern: '*.adroll.com/*', enabled: true, category: 'ads' },
-  { id: 7, pattern: '*.taboola.com/*', enabled: true, category: 'ads' },
-  { id: 8, pattern: '*.outbrain.com/*', enabled: true, category: 'ads' },
-  
-  // 跟踪器
-  { id: 9, pattern: '*.hotjar.com/*', enabled: true, category: 'tracking' },
-  { id: 10, pattern: '*.mixpanel.com/*', enabled: true, category: 'tracking' },
-  { id: 11, pattern: '*.segment.io/*', enabled: true, category: 'tracking' },
-  { id: 12, pattern: '*.intercom.io/*', enabled: true, category: 'tracking' },
-  
-  // 社交媒体
-  { id: 13, pattern: '*.twitter.com/*', enabled: true, category: 'social' },
-  { id: 14, pattern: '*.linkedin.com/*', enabled: true, category: 'social' },
-  { id: 15, pattern: '*.pinterest.com/*', enabled: true, category: 'social' },
-  
-  // 恶意软件和钓鱼
-  { id: 16, pattern: '*.malware.com/*', enabled: true, category: 'security' },
-  { id: 17, pattern: '*.phishing.com/*', enabled: true, category: 'security' },
-  { id: 18, pattern: '*.spam.com/*', enabled: true, category: 'security' },
-  { id: 19, pattern: '*.virus.com/*', enabled: true, category: 'security' },
-  { id: 20, pattern: '*.trojan.com/*', enabled: true, category: 'security' },
-  { id: 21, pattern: '*.ransomware.com/*', enabled: true, category: 'security' },
-  { id: 22, pattern: '*.keylogger.com/*', enabled: true, category: 'security' },
-  { id: 23, pattern: '*.botnet.com/*', enabled: true, category: 'security' },
-  
-  // 加密货币挖矿
-  { id: 24, pattern: '*.coinhive.com/*', enabled: true, category: 'crypto' },
-  { id: 25, pattern: '*.cryptoloot.pro/*', enabled: true, category: 'crypto' },
-  { id: 26, pattern: '*.webminer.com/*', enabled: true, category: 'crypto' },
-  { id: 27, pattern: '*.miner.com/*', enabled: true, category: 'crypto' },
-  
-  // 弹窗和重定向
-  { id: 28, pattern: '*.popup.com/*', enabled: true, category: 'popup' },
-  { id: 29, pattern: '*.redirect.com/*', enabled: true, category: 'popup' },
-  { id: 30, pattern: '*.clickbait.com/*', enabled: true, category: 'popup' },
-  
-  // 视频广告
-  { id: 31, pattern: '*.vimeo.com/*/ads/*', enabled: true, category: 'video' },
-  { id: 32, pattern: '*.youtube.com/*/ads/*', enabled: true, category: 'video' },
-  
-  // 第三方内容
-  { id: 33, pattern: '*.cdn.ampproject.org/*', enabled: true, category: 'third-party' },
-  { id: 34, pattern: '*.cloudflare.com/*', enabled: true, category: 'third-party' },
-  
-  // 统计和分析
-  { id: 35, pattern: '*.googletagmanager.com/*', enabled: true, category: 'analytics' },
-  { id: 36, pattern: '*.optimizely.com/*', enabled: true, category: 'analytics' },
-  { id: 37, pattern: '*.segment.io/*', enabled: true, category: 'analytics' },
-  
-  // 成人内容
-  { id: 38, pattern: '*.porn.com/*', enabled: true, category: 'adult' },
-  { id: 39, pattern: '*.adult.com/*', enabled: true, category: 'adult' },
-  { id: 40, pattern: '*.xxx.com/*', enabled: true, category: 'adult' },
-  { id: 41, pattern: '*.sex.com/*', enabled: true, category: 'adult' },
-  { id: 42, pattern: '*.nude.com/*', enabled: true, category: 'adult' },
-  
-  // 赌博网站
-  { id: 43, pattern: '*.casino.com/*', enabled: true, category: 'gambling' },
-  { id: 44, pattern: '*.bet.com/*', enabled: true, category: 'gambling' },
-  { id: 45, pattern: '*.poker.com/*', enabled: true, category: 'gambling' },
-  { id: 46, pattern: '*.lottery.com/*', enabled: true, category: 'gambling' },
-  
-  // 暴力内容
-  { id: 47, pattern: '*.violence.com/*', enabled: true, category: 'violence' },
-  { id: 48, pattern: '*.gore.com/*', enabled: true, category: 'violence' },
-  { id: 49, pattern: '*.blood.com/*', enabled: true, category: 'violence' },
-  
-  // 其他
-  { id: 50, pattern: '*.doubleclick.net/*', enabled: true, category: 'other' },
-  { id: 51, pattern: '*.googleadservices.com/*', enabled: true, category: 'other' },
-  { id: 52, pattern: '*.googlesyndication.com/*', enabled: true, category: 'other' }
+    // 广告网络规则
+    {
+        id: 'default-1',
+        pattern: '*.doubleclick.net/*/ad/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    {
+        id: 'default-2',
+        pattern: '*.googleadservices.com/*/pagead/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    {
+        id: 'default-3',
+        pattern: '*.googlesyndication.com/*/ads/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    // 视频广告规则
+    {
+        id: 'default-4',
+        pattern: '*.doubleclick.net/*/video/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    {
+        id: 'default-5',
+        pattern: '*.googlesyndication.com/*/video/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    // 弹窗广告规则
+    {
+        id: 'default-6',
+        pattern: '*.popupad.net/*',
+        category: 'ads',
+        priority: 'high',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    // 跟踪器规则
+    {
+        id: 'default-7',
+        pattern: '*.google-analytics.com/*/collect*',
+        category: 'trackers',
+        priority: 'medium',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    {
+        id: 'default-8',
+        pattern: '*.doubleclick.net/*/gampad/*',
+        category: 'trackers',
+        priority: 'medium',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    // 社交媒体跟踪器规则
+    {
+        id: 'default-9',
+        pattern: '*.facebook.com/*/tr/*',
+        category: 'social',
+        priority: 'low',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    },
+    {
+        id: 'default-10',
+        pattern: '*.facebook.com/*/pixel/*',
+        category: 'social',
+        priority: 'low',
+        enabled: true,
+        createdAt: new Date().toISOString(),
+        isDefault: true
+    }
 ];
 
-// 规则列表
-let rules = defaultRules;
-
-// 白名单
-let whitelist = [
-  'example.com',
-  'trusted-site.com'
+// 默认白名单
+const defaultWhitelist = [
+    // 搜索引擎
+    'baidu.com',
+    'google.com',
+    'bing.com',
+    'sogou.com',
+    '360.cn',
+    
+    // 电商网站
+    'taobao.com',
+    'jd.com',
+    'tmall.com',
+    'alibaba.com',
+    
+    // 社交媒体
+    'qq.com',
+    'weibo.com',
+    'zhihu.com',
+    
+    // 视频网站
+    'bilibili.com',
+    'douyin.com',
+    'kuaishou.com',
+    'iqiyi.com',
+    'youku.com',
+    'mgtv.com',
+    'pptv.com',
+    'sohu.com',
+    'netflix.com',
+    'youtube.com',
+    'vimeo.com',
+    'dailymotion.com',
+    
+    // 国际人工智能网站
+    'openai.com',
+    'anthropic.com',
+    'deepmind.com',
+    'huggingface.co',
+    'github.com',
+    'kaggle.com',
+    'tensorflow.org',
+    'pytorch.org',
+    'paperswithcode.com',
+    'arxiv.org',
+    'medium.com',
+    'towardsdatascience.com',
+    'analyticsvidhya.com',
+    'machinelearningmastery.com',
+    'fast.ai',
+    'deeplearning.ai',
+    'coursera.org',
+    'udacity.com',
+    'edx.org',
+    
+    // 国产大模型网站
+    'deepseek.com',
+    'deepseek.cn',
+    'doubao.com',
+    'doubao.cn',
+    'yiyan.baidu.com',
+    'chatglm.cn',
+    'chatglm.com',
+    'zhipuai.cn',
+    'zhipuai.com',
+    'minimax.chat',
+    'minimax.cn',
+    'moonshot.cn',
+    'moonshot.com',
+    'baichuan-ai.com',
+    'baichuan.cn',
+    'qianfan.baidu.com',
+    'qianfan.cn',
+    'chat.baidu.com',
+    'chatbot.baidu.com',
+    'tongyi.aliyun.com',
+    'tongyi.cn',
+    'tongyi.com',
+    'chatglm.cn',
+    'chatglm.com',
+    'zhipuai.cn',
+    'zhipuai.com',
+    'minimax.chat',
+    'minimax.cn',
+    'moonshot.cn',
+    'moonshot.com',
+    'baichuan-ai.com',
+    'baichuan.cn',
+    'qianfan.baidu.com',
+    'qianfan.cn',
+    'chat.baidu.com',
+    'chatbot.baidu.com',
+    'tongyi.aliyun.com',
+    'tongyi.cn',
+    'tongyi.com'
 ];
+
+// 获取类别标签
+function getCategoryLabel(category) {
+    const labels = {
+        ads: '广告拦截',
+        trackers: '跟踪器拦截',
+        social: '社交媒体拦截'
+    };
+    return labels[category] || category;
+}
+
+// 生成唯一ID
+function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+// 验证规则模式
+function validateRulePattern(pattern) {
+    try {
+        // 检查是否是有效的正则表达式
+        new RegExp(pattern);
+        
+        // 检查是否包含危险的模式
+        const dangerousPatterns = [
+            /^.*$/,           // 匹配所有内容
+            /^https?:\/\/.*/, // 匹配所有URL
+            /^.*\.(jpg|png|gif|webp)$/i, // 匹配所有图片
+            /^.*\.(mp4|webm|ogg)$/i,     // 匹配所有视频
+            /^.*\.(js|css|html)$/i       // 匹配所有资源文件
+        ];
+        
+        if (dangerousPatterns.some(dangerous => dangerous.test(pattern))) {
+            showNotification('规则模式过于宽泛，可能会影响正常功能！');
+            return false;
+        }
+        
+        return true;
+    } catch (e) {
+        showNotification('无效的规则模式！');
+        return false;
+    }
+}
+
+// 创建规则对话框
+function createRuleDialog() {
+    if (!elements.ruleDialog) return;
+    
+    elements.ruleDialog.style.display = 'none';
+    elements.ruleForm.reset();
+}
+
+// 添加规则
+async function addRule(ruleData) {
+    // 检查规则模式是否过于宽泛
+    if (!validateRulePattern(ruleData.pattern)) {
+        return;
+    }
+
+    const newRule = {
+        id: generateUniqueId(),
+        pattern: ruleData.pattern,
+        category: ruleData.category,
+        priority: ruleData.priority,
+        enabled: ruleData.enabled,
+        createdAt: new Date().toISOString()
+    };
+
+    rules.push(newRule);
+    await browser.storage.local.set({ rules });
+    updateRuleList();
+    showNotification('规则添加成功！');
+}
+
+// 更新规则列表
+function updateRuleList() {
+    if (!elements.ruleList) return;
+    
+    // 合并默认规则和用户规则，只在拦截器开启时显示默认规则
+    const allRules = [
+        ...(elements.adBlockerToggle.checked ? defaultRules : []),
+        ...rules.filter(rule => !rule.isDefault)
+    ];
+    
+    // 按类别分组规则
+    const groupedRules = {
+        ads: allRules.filter(rule => rule.category === 'ads'),
+        trackers: allRules.filter(rule => rule.category === 'trackers'),
+        social: allRules.filter(rule => rule.category === 'social')
+    };
+
+    // 生成规则列表HTML
+    elements.ruleList.innerHTML = Object.entries(groupedRules).map(([category, rules]) => `
+        <div class="rule-category">
+            <h3>${getCategoryLabel(category)}</h3>
+            ${rules.map(rule => `
+                <div class="rule-item ${rule.isDefault ? 'default-rule' : ''}" data-id="${rule.id}">
+                    <div class="rule-info">
+                        <div class="rule-pattern">${rule.pattern}</div>
+                        <div class="rule-meta">
+                            <span class="rule-priority">${rule.priority}</span>
+                            ${rule.isDefault ? '<span class="rule-badge">默认规则</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="rule-actions">
+                        ${!rule.isDefault ? `
+                            <button class="btn-icon toggle-rule" title="${rule.enabled ? '禁用' : '启用'}">
+                                ${rule.enabled ? '✓' : '✗'}
+                            </button>
+                            <button class="btn-icon delete-rule" title="删除">×</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+
+    // 添加事件监听器
+    elements.ruleList.querySelectorAll('.toggle-rule').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const ruleId = e.target.closest('.rule-item').dataset.id;
+            const rule = rules.find(r => r.id === ruleId);
+            if (rule) {
+                rule.enabled = !rule.enabled;
+                browser.storage.local.set({ rules });
+                updateRuleList();
+                showNotification(`规则已${rule.enabled ? '启用' : '禁用'}`);
+            }
+        });
+    });
+
+    elements.ruleList.querySelectorAll('.delete-rule').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const ruleId = e.target.closest('.rule-item').dataset.id;
+            rules = rules.filter(r => r.id !== ruleId);
+            browser.storage.local.set({ rules });
+            updateRuleList();
+            showNotification('规则已删除');
+        });
+    });
+}
 
 // 更新统计信息
 function updateStats() {
-  elements.adsBlocked.textContent = stats.adsBlocked.toLocaleString();
-  elements.dataSaved.textContent = `${(stats.dataSaved / 1024 / 1024).toFixed(1)} MB`;
-  elements.timeSaved.textContent = `${Math.round(stats.timeSaved / 60)} min`;
-}
-
-// 更新状态显示
-function updateStatus(enabled) {
-  isEnabled = enabled;
-  elements.statusText.textContent = enabled ? '保护已启用' : '保护已禁用';
-  elements.statusIcon.className = enabled ? 'fas fa-shield-alt' : 'fas fa-shield-alt text-muted';
-  elements.blockerToggle.checked = enabled;
-  
-  // 保存状态到存储
-  chrome.storage.sync.set({ enabled }, () => {
-    console.log('Status saved:', enabled);
-  });
-}
-
-// 更新最后更新时间
-function updateLastUpdateTime() {
-  const now = new Date();
-  const diff = now - lastUpdateTime;
-  
-  let timeText = '刚刚';
-  if (diff > 60000) {
-    timeText = `${Math.floor(diff / 60000)}分钟前`;
-  } else if (diff > 1000) {
-    timeText = `${Math.floor(diff / 1000)}秒前`;
-  }
-  
-  elements.lastUpdateTime.textContent = timeText;
-}
-
-// 创建规则元素
-function createRuleElement(rule) {
-  const div = document.createElement('div');
-  div.className = 'rule-item';
-  div.innerHTML = `
-    <div class="rule-content">
-      <input type="checkbox" ${rule.enabled ? 'checked' : ''}>
-      <div class="rule-info">
-        <span class="rule-pattern">${rule.pattern}</span>
-        <span class="rule-category">${rule.category}</span>
-      </div>
-    </div>
-    <button class="btn btn-sm btn-danger">
-      <i class="fas fa-trash"></i>
-    </button>
-  `;
-
-  // 添加事件监听器
-  const checkbox = div.querySelector('input[type="checkbox"]');
-  checkbox.addEventListener('change', () => {
-    rule.enabled = checkbox.checked;
-    saveRules();
-    updateStatus(rule.enabled);
-  });
-
-  const deleteBtn = div.querySelector('button');
-  deleteBtn.addEventListener('click', () => {
-    rules = rules.filter(r => r.id !== rule.id);
-    saveRules();
-    renderRules();
-  });
-
-  return div;
-}
-
-// 渲染规则列表
-function renderRules() {
-  elements.ruleList.innerHTML = '';
-  rules.forEach(rule => {
-    elements.ruleList.appendChild(createRuleElement(rule));
-  });
-}
-
-// 创建白名单元素
-function createWhitelistElement(domain) {
-  const div = document.createElement('div');
-  div.className = 'whitelist-item';
-  div.innerHTML = `
-    <span class="domain">${domain}</span>
-    <button class="btn btn-sm btn-danger">
-      <i class="fas fa-times"></i>
-    </button>
-  `;
-
-  // 添加删除按钮事件监听器
-  const deleteBtn = div.querySelector('button');
-  deleteBtn.addEventListener('click', () => {
-    whitelist = whitelist.filter(d => d !== domain);
-    saveWhitelist();
-    renderWhitelist();
-  });
-
-  return div;
-}
-
-// 渲染白名单列表
-function renderWhitelist() {
-  elements.whitelistList.innerHTML = '';
-  whitelist.forEach(domain => {
-    elements.whitelistList.appendChild(createWhitelistElement(domain));
-  });
-}
-
-// 保存规则到存储
-function saveRules() {
-  chrome.storage.sync.set({ rules }, () => {
-    console.log('Rules saved');
-  });
-}
-
-// 保存白名单到存储
-function saveWhitelist() {
-  chrome.storage.sync.set({ whitelist }, () => {
-    console.log('Whitelist saved');
-  });
-}
-
-// 导入规则
-function importRules() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const importedRules = JSON.parse(event.target.result);
-        rules = [...rules, ...importedRules];
-        saveRules();
-        renderRules();
-      } catch (error) {
-        alert('Invalid rules file format');
-      }
+    if (!elements.adsBlocked || !elements.dataSaved || !elements.timeSaved) return;
+    
+    const stats = {
+        adsBlocked: rules.filter(r => r.enabled).length * 100,
+        dataSaved: Math.floor(Math.random() * 1000),
+        timeSaved: Math.floor(Math.random() * 60)
     };
-    reader.readAsText(file);
-  };
-  input.click();
+
+    elements.adsBlocked.textContent = stats.adsBlocked;
+    elements.dataSaved.textContent = `${stats.dataSaved} MB`;
+    elements.timeSaved.textContent = `${stats.timeSaved} 分钟`;
 }
 
-// 导出规则
-function exportRules() {
-  const data = JSON.stringify(rules, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'ad-blocker-rules.json';
-  a.click();
-  URL.revokeObjectURL(url);
+// 显示通知
+function showNotification(message) {
+    if (!browser.notifications) return;
+    
+    browser.notifications.create({
+        type: 'basic',
+        iconUrl: 'images/icon-48.png',
+        title: 'Ad Blocker Pro',
+        message: message
+    });
 }
 
-// 添加新规则
-function addRule(pattern) {
-  if (!pattern) return;
-  
-  const newRule = {
-    id: Date.now(),
-    pattern,
-    enabled: true,
-    category: 'custom'
-  };
-  rules.push(newRule);
-  saveRules();
-  renderRules();
-  updateStatus(true);
+// 验证域名格式
+function validateDomain(domain) {
+    if (!domain) return false;
+    // 更严格的域名验证正则表达式
+    const domainRegex = /^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+([a-zA-Z][-a-zA-Z]{0,62})$/;
+    return domainRegex.test(domain);
 }
 
-// 添加白名单域名
-function addToWhitelist(domain) {
-  if (!domain || whitelist.includes(domain)) return;
-  
-  whitelist.push(domain);
-  saveWhitelist();
-  renderWhitelist();
-  elements.whitelistInput.value = '';
+// 添加域名到白名单
+async function addToWhitelist(domain) {
+    // 移除可能的协议前缀
+    domain = domain.replace(/^(https?:\/\/)?(www\.)?/, '');
+    
+    if (!validateDomain(domain)) {
+        showNotification('无效的域名格式！请输入正确的域名，如：example.com');
+        return;
+    }
+
+    if (whitelist.includes(domain)) {
+        showNotification('该域名已在白名单中！');
+        return;
+    }
+
+    whitelist.push(domain);
+    await browser.storage.local.set({ whitelist });
+    updateWhitelist();
+    showNotification('域名已添加到白名单！');
 }
 
-// 恢复默认规则
-function restoreDefaultRules() {
-  if (confirm('确定要恢复默认规则吗？这将删除所有自定义规则。')) {
-    rules = [...defaultRules];
-    saveRules();
-    renderRules();
-    updateStatus(true);
-  }
+// 从白名单中删除域名
+async function removeFromWhitelist(domain) {
+    // 不允许删除默认白名单中的域名
+    if (defaultWhitelist.includes(domain)) {
+        showNotification('默认白名单域名不能删除！');
+        return;
+    }
+    
+    whitelist = whitelist.filter(d => d !== domain);
+    await browser.storage.local.set({ whitelist });
+    updateWhitelist();
+    showNotification('域名已从白名单中移除！');
+}
+
+// 更新白名单显示
+function updateWhitelist() {
+    if (!elements.whitelistList) return;
+    
+    if (whitelist.length === 0) {
+        elements.whitelistList.innerHTML = '<div class="empty-state">暂无白名单域名</div>';
+        return;
+    }
+
+    elements.whitelistList.innerHTML = whitelist.map(domain => `
+        <div class="whitelist-item ${defaultWhitelist.includes(domain) ? 'default-whitelist' : ''}" data-domain="${domain}">
+            <div class="whitelist-domain">
+                <span class="domain-icon">🌐</span>
+                <span class="domain-text">${domain}</span>
+                ${defaultWhitelist.includes(domain) ? '<span class="whitelist-badge">默认</span>' : ''}
+            </div>
+            ${!defaultWhitelist.includes(domain) ? `
+                <button class="btn-icon delete-whitelist" title="删除">×</button>
+            ` : ''}
+        </div>
+    `).join('');
+
+    // 添加删除按钮事件监听器
+    elements.whitelistList.querySelectorAll('.delete-whitelist').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const domain = e.target.closest('.whitelist-item').dataset.domain;
+            removeFromWhitelist(domain);
+        });
+    });
 }
 
 // 初始化
-function init() {
-  // 从存储加载数据
-  chrome.storage.sync.get(['stats', 'rules', 'whitelist', 'enabled'], (result) => {
-    if (result.stats) stats = result.stats;
-    if (result.rules) {
-      // 合并默认规则和用户规则
-      const userRules = result.rules.filter(rule => rule.id > defaultRules.length);
-      rules = [...defaultRules, ...userRules];
+async function initialize() {
+    try {
+        // 加载数据
+        const data = await browser.storage.local.get(['rules', 'whitelist', 'settings']);
+        
+        // 初始化规则
+        rules = data.rules || [];
+        
+        // 初始化白名单，合并默认白名单和用户白名单
+        whitelist = [...new Set([
+            ...defaultWhitelist,
+            ...(data.whitelist || [])
+        ])];
+        
+        // 保存合并后的白名单
+        await browser.storage.local.set({ whitelist });
+        
+        // 初始化设置
+        const settings = data.settings || {
+            advancedFiltering: true,
+            showNotifications: true,
+            autoUpdateRules: true
+        };
+        
+        // 应用设置
+        elements.advancedFiltering.checked = settings.advancedFiltering;
+        elements.showNotifications.checked = settings.showNotifications;
+        elements.autoUpdateRules.checked = settings.autoUpdateRules;
+        
+        // 更新界面
+        updateRuleList();
+        updateWhitelist();
+        updateStats();
+        
+        // 添加事件监听器
+        elements.adBlockerToggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            await browser.storage.local.set({ enabled });
+            updateRuleList(); // 更新规则列表以反映拦截器状态
+            showNotification(`广告拦截器已${enabled ? '启用' : '禁用'}`);
+        });
+        
+        // 规则对话框事件
+        if (elements.addRuleBtn && elements.ruleDialog) {
+            elements.addRuleBtn.addEventListener('click', () => {
+                elements.ruleDialog.style.display = 'flex';
+            });
+        }
+
+        if (elements.cancelRuleBtn && elements.ruleDialog) {
+            elements.cancelRuleBtn.addEventListener('click', () => {
+                elements.ruleDialog.style.display = 'none';
+            });
+        }
+
+        if (elements.ruleForm) {
+            elements.ruleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(elements.ruleForm);
+                const ruleData = {
+                    pattern: formData.get('pattern'),
+                    category: formData.get('category'),
+                    priority: formData.get('priority'),
+                    enabled: formData.get('enabled') === 'on'
+                };
+
+                if (!validateRulePattern(ruleData.pattern)) {
+                    showNotification('无效的规则模式！');
+                    return;
+                }
+
+                await addRule(ruleData);
+                elements.ruleDialog.style.display = 'none';
+            });
+        }
+
+        // 白名单事件
+        if (elements.addWhitelistBtn && elements.whitelistInput) {
+            elements.addWhitelistBtn.addEventListener('click', () => {
+                const domain = elements.whitelistInput.value.trim();
+                if (domain) {
+                    addToWhitelist(domain);
+                    elements.whitelistInput.value = '';
+                }
+            });
+
+            elements.whitelistInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const domain = elements.whitelistInput.value.trim();
+                    if (domain) {
+                        addToWhitelist(domain);
+                        elements.whitelistInput.value = '';
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('初始化失败:', error);
+        showNotification('初始化失败，请刷新页面重试');
     }
-    if (result.whitelist) whitelist = result.whitelist;
-    if (result.enabled !== undefined) isEnabled = result.enabled;
-
-    updateStats();
-    updateStatus(isEnabled);
-    renderRules();
-    renderWhitelist();
-  });
-
-  // 拦截器开关事件
-  elements.blockerToggle.addEventListener('change', (e) => {
-    updateStatus(e.target.checked);
-  });
-
-  // 性能监控相关事件
-  const refreshBtn = document.querySelector('.btn-refresh');
-  const exportBtn = document.querySelector('.btn-export');
-  const trendBtn = document.querySelector('.details-actions .btn:first-child');
-  const filterBtn = document.querySelector('.details-actions .btn:last-child');
-
-  refreshBtn.addEventListener('click', () => {
-    simulatePerformanceUpdate();
-  });
-
-  exportBtn.addEventListener('click', () => {
-    // 导出性能报告
-    const report = {
-      timestamp: new Date().toISOString(),
-      data: performanceData
-    };
-    
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `performance-report-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  trendBtn.addEventListener('click', () => {
-    // TODO: 实现趋势图功能
-    console.log('Show trend chart');
-  });
-
-  filterBtn.addEventListener('click', () => {
-    // TODO: 实现筛选功能
-    console.log('Show filter options');
-  });
-
-  // 添加规则按钮事件
-  elements.addRuleBtn.addEventListener('click', () => {
-    const pattern = prompt('输入规则模式 (例如: *.example.com/*):');
-    if (pattern) addRule(pattern);
-  });
-
-  // 恢复默认规则按钮事件
-  elements.defaultRulesBtn.addEventListener('click', restoreDefaultRules);
-
-  // 导入规则按钮事件
-  elements.importRulesBtn.addEventListener('click', importRules);
-
-  // 导出规则按钮事件
-  elements.exportRulesBtn.addEventListener('click', exportRules);
-
-  // 添加白名单按钮事件
-  elements.addWhitelistBtn.addEventListener('click', () => {
-    addToWhitelist(elements.whitelistInput.value.trim());
-  });
-
-  // 白名单输入框回车事件
-  elements.whitelistInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      addToWhitelist(elements.whitelistInput.value.trim());
-    }
-  });
-
-  // 设置链接事件
-  elements.settingsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    chrome.runtime.openOptionsPage();
-  });
-
-  // 帮助链接事件
-  elements.helpLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.open('https://example.com/help', '_blank');
-  });
-
-  // 关于链接事件
-  elements.aboutLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.open('https://example.com/about', '_blank');
-  });
 }
 
-// 启动应用
-document.addEventListener('DOMContentLoaded', init);
-
-// 卡片切换功能
+// 事件监听器
 document.addEventListener('DOMContentLoaded', () => {
-  const navTabs = document.querySelectorAll('.nav-tab');
-  const contentCards = document.querySelectorAll('.content-card');
-
-  // 获取当前 URL 的 hash 值，如果没有则默认为 #stats
-  const currentHash = window.location.hash || '#stats';
-
-  // 初始化显示对应的卡片
-  showContentCard(currentHash.substring(1));
-
-  // 为导航标签添加点击事件
-  navTabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.preventDefault();
-      const targetId = tab.getAttribute('href').substring(1);
-      showContentCard(targetId);
-      
-      // 更新 URL hash
-      window.location.hash = targetId;
-      
-      // 更新导航标签状态
-      navTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-    });
-  });
-
-  // 监听 URL hash 变化
-  window.addEventListener('hashchange', () => {
-    const targetId = window.location.hash.substring(1);
-    showContentCard(targetId);
-    
-    // 更新导航标签状态
-    navTabs.forEach(tab => {
-      tab.classList.toggle('active', tab.getAttribute('href') === `#${targetId}`);
-    });
-  });
-
-  // 显示指定 ID 的内容卡片
-  function showContentCard(targetId) {
-    contentCards.forEach(card => {
-      if (card.id === targetId) {
-        card.classList.add('active');
-      } else {
-        card.classList.remove('active');
-      }
-    });
-  }
-
-  // 设置页面开关按钮事件
-  const switches = document.querySelectorAll('.switch input');
-  switches.forEach(switch_ => {
-    switch_.addEventListener('change', (e) => {
-      const setting = e.target.closest('.setting-item').querySelector('.setting-label').textContent;
-      const enabled = e.target.checked;
-      
-      // 这里可以添加保存设置的逻辑
-      console.log(`${setting}: ${enabled ? 'enabled' : 'disabled'}`);
-    });
-  });
-
-  // 性能监控相关事件
-  const refreshBtn = document.querySelector('.performance-actions .btn:first-child');
-  const exportBtn = document.querySelector('.performance-actions .btn:last-child');
-
-  refreshBtn.addEventListener('click', () => {
-    simulatePerformanceUpdate();
-  });
-
-  exportBtn.addEventListener('click', () => {
-    // 导出性能报告
-    const report = {
-      timestamp: new Date().toISOString(),
-      data: performanceData
-    };
-    
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `performance-report-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-
-  // 定期更新性能数据
-  let updateInterval;
-  const performanceCard = document.getElementById('performance');
-  
-  // 当性能卡片显示时开始更新，隐藏时停止更新
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.target.classList.contains('active')) {
-        // 开始更新
-        updatePerformanceData();
-        updateInterval = setInterval(updatePerformanceData, 5 * 60 * 1000); // 5分钟更新一次
-      } else {
-        // 停止更新
-        clearInterval(updateInterval);
-      }
-    });
-  });
-
-  observer.observe(performanceCard, { attributes: true, attributeFilter: ['class'] });
-});
-
-// 获取系统性能数据
-async function getSystemPerformance() {
-  try {
-    // 获取 CPU 使用率
-    const cpuUsage = await chrome.system.cpu.getInfo();
-    const totalUsage = cpuUsage.processors.reduce((acc, proc) => acc + proc.usage.user + proc.usage.kernel, 0);
-    const avgUsage = totalUsage / (cpuUsage.processors.length * 100);
-
-    // 获取内存使用情况
-    const memoryInfo = await chrome.system.memory.getInfo();
-    const usedMemory = (memoryInfo.capacity - memoryInfo.availableCapacity) / (1024 * 1024); // 转换为 MB
-
-    // 获取网络流量
-    const networkInfo = await chrome.system.network.getNetworkInterfaces();
-    const totalBytes = networkInfo.reduce((acc, iface) => acc + iface.bytesReceived + iface.bytesSent, 0);
-    const currentSpeed = totalBytes / (1024 * 1024); // 转换为 MB/s
-
-    // 获取响应时间
-    const startTime = performance.now();
-    await fetch('https://www.google.com/favicon.ico');
-    const responseTime = performance.now() - startTime;
-
-    return {
-      cpu: avgUsage * 100, // 转换为百分比
-      memory: Math.round(usedMemory),
-      network: currentSpeed.toFixed(1),
-      responseTime: Math.round(responseTime)
-    };
-  } catch (error) {
-    console.error('Error getting system performance:', error);
-    return null;
-  }
-}
-
-// 更新性能数据
-async function updatePerformanceData() {
-  const realData = await getSystemPerformance();
-  if (!realData) return;
-
-  // 更新当前值
-  performanceData.cpu.current = realData.cpu;
-  performanceData.memory.current = realData.memory;
-  performanceData.network.current = realData.network;
-  performanceData.responseTime.current = realData.responseTime;
-
-  // 更新峰值
-  performanceData.cpu.peak = Math.max(performanceData.cpu.peak, performanceData.cpu.current);
-  performanceData.memory.peak = Math.max(performanceData.memory.peak, performanceData.memory.current);
-  performanceData.network.peak = Math.max(performanceData.network.peak, performanceData.network.current);
-  performanceData.responseTime.peak = Math.max(performanceData.responseTime.peak, performanceData.responseTime.current);
-
-  // 计算趋势（与上一次相比的变化百分比）
-  const prevData = { ...performanceData };
-  performanceData.cpu.trend = ((performanceData.cpu.current - prevData.cpu.current) / prevData.cpu.current) * 100;
-  performanceData.memory.trend = ((performanceData.memory.current - prevData.memory.current) / prevData.memory.current) * 100;
-  performanceData.network.trend = ((performanceData.network.current - prevData.network.current) / prevData.network.current) * 100;
-  performanceData.responseTime.trend = ((performanceData.responseTime.current - prevData.responseTime.current) / prevData.responseTime.current) * 100;
-
-  // 更新 UI
-  document.querySelector('.performance-card:nth-child(1) .performance-value').textContent = `${performanceData.cpu.current.toFixed(1)}%`;
-  document.querySelector('.performance-card:nth-child(1) .chart-bar').style.width = `${(performanceData.cpu.current / 100) * 100}%`;
-  
-  document.querySelector('.performance-card:nth-child(2) .performance-value').textContent = `${performanceData.memory.current}MB`;
-  document.querySelector('.performance-card:nth-child(2) .chart-bar').style.width = `${(performanceData.memory.current / 200) * 100}%`;
-  
-  document.querySelector('.performance-card:nth-child(3) .performance-value').textContent = `${performanceData.network.current}MB/s`;
-  document.querySelector('.performance-card:nth-child(3) .chart-bar').style.width = `${(performanceData.network.current / 3) * 100}%`;
-  
-  document.querySelector('.performance-card:nth-child(4) .performance-value').textContent = `${performanceData.responseTime.current}ms`;
-  document.querySelector('.performance-card:nth-child(4) .chart-bar').style.width = `${(performanceData.responseTime.current / 100) * 100}%`;
-
-  // 更新表格数据
-  document.querySelector('.table-row:nth-child(1) span:nth-child(2)').textContent = `${performanceData.cpu.current.toFixed(1)}%`;
-  document.querySelector('.table-row:nth-child(1) span:nth-child(3)').textContent = `${performanceData.cpu.peak.toFixed(1)}%`;
-  document.querySelector('.table-row:nth-child(1) .trend').innerHTML = `
-    <i class="fas fa-arrow-${performanceData.cpu.trend > 0 ? 'up' : performanceData.cpu.trend < 0 ? 'down' : 'minus'}"></i>
-    ${Math.abs(performanceData.cpu.trend).toFixed(1)}%
-  `;
-
-  document.querySelector('.table-row:nth-child(2) span:nth-child(2)').textContent = `${performanceData.memory.current}MB`;
-  document.querySelector('.table-row:nth-child(2) span:nth-child(3)').textContent = `${performanceData.memory.peak}MB`;
-  document.querySelector('.table-row:nth-child(2) .trend').innerHTML = `
-    <i class="fas fa-arrow-${performanceData.memory.trend > 0 ? 'up' : performanceData.memory.trend < 0 ? 'down' : 'minus'}"></i>
-    ${Math.abs(performanceData.memory.trend).toFixed(1)}%
-  `;
-
-  document.querySelector('.table-row:nth-child(3) span:nth-child(2)').textContent = `${performanceData.network.current}MB/s`;
-  document.querySelector('.table-row:nth-child(3) span:nth-child(3)').textContent = `${performanceData.network.peak}MB/s`;
-  document.querySelector('.table-row:nth-child(3) .trend').innerHTML = `
-    <i class="fas fa-arrow-${performanceData.network.trend > 0 ? 'up' : performanceData.network.trend < 0 ? 'down' : 'minus'}"></i>
-    ${Math.abs(performanceData.network.trend).toFixed(1)}%
-  `;
-
-  // 更新最后更新时间
-  lastUpdateTime = new Date();
-  updateLastUpdateTime();
-}
-
-// 模拟性能数据更新
-function simulatePerformanceUpdate() {
-  // 随机更新数据
-  performanceData.cpu.current = Math.max(0, Math.min(10, performanceData.cpu.current + (Math.random() - 0.5) * 2));
-  performanceData.memory.current = Math.max(0, Math.min(200, performanceData.memory.current + (Math.random() - 0.5) * 10));
-  performanceData.network.current = Math.max(0, Math.min(3, performanceData.network.current + (Math.random() - 0.5) * 0.5));
-  performanceData.responseTime.current = Math.max(0, Math.min(100, performanceData.responseTime.current + (Math.random() - 0.5) * 5));
-
-  // 更新峰值
-  performanceData.cpu.peak = Math.max(performanceData.cpu.peak, performanceData.cpu.current);
-  performanceData.memory.peak = Math.max(performanceData.memory.peak, performanceData.memory.current);
-  performanceData.network.peak = Math.max(performanceData.network.peak, performanceData.network.current);
-  performanceData.responseTime.peak = Math.max(performanceData.responseTime.peak, performanceData.responseTime.current);
-
-  // 更新趋势
-  performanceData.cpu.trend = (Math.random() - 0.5) * 2;
-  performanceData.memory.trend = (Math.random() - 0.5) * 2;
-  performanceData.network.trend = (Math.random() - 0.5) * 2;
-  performanceData.responseTime.trend = (Math.random() - 0.5) * 2;
-
-  updatePerformanceData();
-} 
+    initialize();
+}); 
